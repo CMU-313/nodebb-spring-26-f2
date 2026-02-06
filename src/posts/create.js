@@ -10,6 +10,9 @@ const groups = require('../groups');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
 
+// add for notifications
+const socketServer = require('../socket.io/index');
+
 module.exports = function (Posts) {
 	Posts.create = async function (data) {
 		// This is an internal method, consider using Topics.reply instead
@@ -89,6 +92,15 @@ module.exports = function (Posts) {
 		const result = await plugins.hooks.fire('filter:post.get', { post: postData, uid: data.uid });
 		result.post.isMain = isMain;
 		plugins.hooks.fire('action:post.save', { post: { ...result.post, _activitypub } });
+		// add notification
+		if (socketServer.server) {
+			const topicTitle = await topics.getTopicField(tid, 'title');
+			socketServer.server.sockets.emit('event:custom_popup', {
+				title: 'New Activity!',
+				message: `Someone just posted in: ${topicTitle}`,
+			});
+		}
+		// end code
 		return result.post;
 	};
 
