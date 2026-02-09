@@ -10,8 +10,7 @@ const groups = require('../groups');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
 
-// add for notifications
-const socketServer = require('../socket.io/index');
+const sockets = require('../socket.io'); 
 
 module.exports = function (Posts) {
 	Posts.create = async function (data) {
@@ -92,15 +91,28 @@ module.exports = function (Posts) {
 		const result = await plugins.hooks.fire('filter:post.get', { post: postData, uid: data.uid });
 		result.post.isMain = isMain;
 		plugins.hooks.fire('action:post.save', { post: { ...result.post, _activitypub } });
-		// add notification
-		if (socketServer.server) {
-			const topicTitle = await topics.getTopicField(tid, 'title');
-			socketServer.server.sockets.emit('event:custom_popup', {
-				title: 'New Activity!',
-				message: `Someone just posted in: ${topicTitle}`,
-			});
+
+		if (!isMain && sockets.server) { //Verifies post is a reply and the socket server is currently running
+			try {
+				const topicTitle = await topics.getTopicField(tid, 'title'); 
+				let targetUid = await topics.getTopicField(tid, 'uid'); //Defalt action: Notify topic owner
+				//For reply chains (reply to a reply), user who is replied to gets notified
+				if (postData.toPid) {
+					targetUid = await Posts.getPostField(postData.toPid, 'uid');
+				}
+				if (parseInt(targetUid, 10) !== parseInt(uid, 10)) { //Don't noify author of their own reply
+					sockets.server.to(`uid_${targetUid}`).emit('event:alert', {
+						title: 'New Reply!',
+						message: `Someone replied in: ${topicTitle}`,
+						type: 'info',
+						timeout: 5000,
+					});
+				}
+			} catch (err) { 
+				console.error('[posts/create] popup notify failed:', err);
+			}
 		}
-		// end code
+
 		return result.post;
 	};
 
