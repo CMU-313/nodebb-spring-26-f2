@@ -67,16 +67,41 @@ async function getGroups(req, sort, page) {
 	return [groupData, pageCount];
 }
 
-groupsController.details = async function (req, res, next) {
+function normalizeGroupSlug(req, res) {
 	const lowercaseSlug = req.params.slug.toLowerCase();
-	if (req.params.slug !== lowercaseSlug) {
-		if (res.locals.isAPI) {
-			req.params.slug = lowercaseSlug;
-		} else {
-			return res.redirect(`${nconf.get('relative_path')}/groups/${lowercaseSlug}`);
-		}
+	if (req.params.slug === lowercaseSlug) {
+		return lowercaseSlug;
 	}
-	const groupName = await groups.getGroupNameByGroupSlug(req.params.slug);
+
+	if (res.locals.isAPI) {
+		req.params.slug = lowercaseSlug;
+		return lowercaseSlug;
+	}
+
+	res.redirect(`${nconf.get('relative_path')}/groups/${lowercaseSlug}`);
+	return null;
+}
+
+async function canAccessHiddenGroup({ groupName, uid, isHidden, isAdmin, isGlobalMod }) {
+	if (!isHidden || isAdmin || isGlobalMod) {
+		return true;
+	}
+
+	const [isMember, isInvited] = await Promise.all([
+		groups.isMember(uid, groupName),
+		groups.isInvited(uid, groupName),
+	]);
+
+	return isMember || isInvited;
+}
+
+groupsController.details = async function (req, res, next) {
+	const slug = normalizeGroupSlug(req, res);
+	if (!slug) {
+		return;
+	}
+
+	const groupName = await groups.getGroupNameByGroupSlug(slug);
 	if (!groupName) {
 		return next();
 	}
@@ -89,15 +114,19 @@ groupsController.details = async function (req, res, next) {
 	if (!exists) {
 		return next();
 	}
-	if (isHidden && !isAdmin && !isGlobalMod) {
-		const [isMember, isInvited] = await Promise.all([
-			groups.isMember(req.uid, groupName),
-			groups.isInvited(req.uid, groupName),
-		]);
-		if (!isMember && !isInvited) {
-			return next();
-		}
+
+	const canAccess = await canAccessHiddenGroup({
+		groupName,
+		uid: req.uid,
+		isHidden,
+		isAdmin,
+		isGlobalMod,
+	});
+
+	if (!canAccess) {
+		return next();
 	}
+
 	const [groupData, posts] = await Promise.all([
 		groups.get(groupName, {
 			uid: req.uid,
@@ -113,18 +142,21 @@ groupsController.details = async function (req, res, next) {
 	res.locals.linkTags = [
 		{
 			rel: 'canonical',
-			href: `${url}/groups/${lowercaseSlug}`,
+			href: `${url}/groups/${slug}`,
 		},
 	];
 
 	res.render('groups/details', {
 		title: `[[pages:group, ${groupData.displayName}]]`,
 		group: groupData,
-		posts: posts,
-		isAdmin: isAdmin,
-		isGlobalMod: isGlobalMod,
+		posts,
+		isAdmin,
+		isGlobalMod,
 		allowPrivateGroups: meta.config.allowPrivateGroups,
-		breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[pages:groups]]', url: '/groups' }, { text: groupData.displayName }]),
+		breadcrumbs: helpers.buildBreadcrumbs([
+			{ text: '[[pages:groups]]', url: '/groups' },
+			{ text: groupData.displayName },
+		]),
 	});
 };
 
