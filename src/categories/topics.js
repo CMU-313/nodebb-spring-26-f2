@@ -28,8 +28,6 @@ module.exports = function (Categories) {
 	};
 
 	Categories.getTopicIds = async function (data) {
-		const sort = data.sort || (data.settings && data.settings.categoryTopicSort) || meta.config.categoryTopicSort || 'recently_replied';
-		const useReverse = sort !== 'least_replied';
 		const [pinnedTids, set] = await Promise.all([
 			Categories.getPinnedTids({ ...data, start: 0, stop: -1 }),
 			Categories.buildTopicsSortedSet(data),
@@ -66,11 +64,9 @@ module.exports = function (Categories) {
 		let normalTids;
 		if (Array.isArray(set)) {
 			const weights = set.map((s, index) => (index ? 0 : 1));
-			const method = useReverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect';
-			normalTids = await db[method]({ sets: set, start: start, stop: stop, weights: weights });
+			normalTids = await db.getSortedSetRevIntersect({ sets: set, start: start, stop: stop, weights: weights });
 		} else {
-			const method = useReverse ? 'getSortedSetRevRange' : 'getSortedSetRange';
-			normalTids = await db[method](set, start, stop);
+			normalTids = await db.getSortedSetRevRange(set, start, stop);
 		}
 		normalTids = normalTids.filter(tid => !pinnedTids.includes(tid));
 		return pinnedTidsOnPage.concat(normalTids);
@@ -102,7 +98,6 @@ module.exports = function (Categories) {
 			most_posts: `cid:${cid}:tids:posts`,
 			most_votes: `cid:${cid}:tids:votes`,
 			most_views: `cid:${cid}:tids:views`,
-			least_replied: `cid:${cid}:tids:posts`,
 		};
 
 		const mainSet = sortToSet.hasOwnProperty(sort) ? sortToSet[sort] : `cid:${cid}:tids`;
@@ -272,7 +267,6 @@ module.exports = function (Categories) {
 				most_posts: `cid:${cid}:tids:posts`,
 				most_votes: `cid:${cid}:tids:votes`,
 				most_views: `cid:${cid}:tids:views`,
-				least_replied: `cid:${cid}:tids:posts`,
 			};
 
 			return sortToSet[sort];
@@ -286,7 +280,7 @@ module.exports = function (Categories) {
 
 		const sorted = tids
 			.map((tid, idx) => [tid, scores[idx]])
-			.sort(([, a], [, b]) => (sort === 'least_replied' ? a - b : b - a))
+			.sort(([, a], [, b]) => b - a)
 			.map(([tid]) => tid);
 
 		return sorted;

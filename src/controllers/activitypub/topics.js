@@ -15,7 +15,7 @@ const helpers = require('../helpers');
 const controller = module.exports;
 
 const validSorts = [
-	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views', 'least_replied',
+	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views',
 ];
 
 controller.list = async function (req, res) {
