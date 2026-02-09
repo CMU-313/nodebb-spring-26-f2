@@ -1,0 +1,143 @@
+diff --git a/public/language/en-GB/admin/settings/post.json b/public/language/en-GB/admin/settings/post.json
+index e000f6b10b..6a35996696 100644
+--- a/public/language/en-GB/admin/settings/post.json
++++ b/public/language/en-GB/admin/settings/post.json
+@@ -6,6 +6,7 @@
+ 	"sorting.newest-to-oldest": "Newest to Oldest",
+ 	"sorting.recently-replied": "Recently Replied",
+ 	"sorting.recently-created": "Recently Created",
++	"sorting.least-replied": "Least Replied",
+ 	"sorting.most-votes": "Most Votes",
+ 	"sorting.most-posts": "Most Posts",
+ 	"sorting.most-views": "Most Views",
+diff --git a/public/language/en-GB/topic.json b/public/language/en-GB/topic.json
+index f736000fb9..f858e335c1 100644
+--- a/public/language/en-GB/topic.json
++++ b/public/language/en-GB/topic.json
+@@ -221,6 +221,7 @@
+ 	"newest-to-oldest": "Newest to Oldest",
+ 	"recently-replied": "Recently Replied",
+ 	"recently-created": "Recently Created",
++	"least-replied": "Least Replied",
+ 	"most-votes": "Most Votes",
+ 	"most-posts": "Most Posts",
+ 	"most-views": "Most Views",
+diff --git a/src/categories/topics.js b/src/categories/topics.js
+index 5169998910..153cebca53 100644
+--- a/src/categories/topics.js
++++ b/src/categories/topics.js
+@@ -28,6 +28,8 @@ module.exports = function (Categories) {
+ 	};
+ 
+ 	Categories.getTopicIds = async function (data) {
++		const sort = data.sort || (data.settings && data.settings.categoryTopicSort) || meta.config.categoryTopicSort || 'recently_replied';
++		const useReverse = sort !== 'least_replied';
+ 		const [pinnedTids, set] = await Promise.all([
+ 			Categories.getPinnedTids({ ...data, start: 0, stop: -1 }),
+ 			Categories.buildTopicsSortedSet(data),
+@@ -64,9 +66,11 @@ module.exports = function (Categories) {
+ 		let normalTids;
+ 		if (Array.isArray(set)) {
+ 			const weights = set.map((s, index) => (index ? 0 : 1));
+-			normalTids = await db.getSortedSetRevIntersect({ sets: set, start: start, stop: stop, weights: weights });
++			const method = useReverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect';
++			normalTids = await db[method]({ sets: set, start: start, stop: stop, weights: weights });
+ 		} else {
+-			normalTids = await db.getSortedSetRevRange(set, start, stop);
++			const method = useReverse ? 'getSortedSetRevRange' : 'getSortedSetRange';
++			normalTids = await db[method](set, start, stop);
+ 		}
+ 		normalTids = normalTids.filter(tid => !pinnedTids.includes(tid));
+ 		return pinnedTidsOnPage.concat(normalTids);
+@@ -98,6 +102,7 @@ module.exports = function (Categories) {
+ 			most_posts: `cid:${cid}:tids:posts`,
+ 			most_votes: `cid:${cid}:tids:votes`,
+ 			most_views: `cid:${cid}:tids:views`,
++			least_replied: `cid:${cid}:tids:posts`,
+ 		};
+ 
+ 		const mainSet = sortToSet.hasOwnProperty(sort) ? sortToSet[sort] : `cid:${cid}:tids`;
+@@ -267,6 +272,7 @@ module.exports = function (Categories) {
+ 				most_posts: `cid:${cid}:tids:posts`,
+ 				most_votes: `cid:${cid}:tids:votes`,
+ 				most_views: `cid:${cid}:tids:views`,
++				least_replied: `cid:${cid}:tids:posts`,
+ 			};
+ 
+ 			return sortToSet[sort];
+@@ -280,7 +286,7 @@ module.exports = function (Categories) {
+ 
+ 		const sorted = tids
+ 			.map((tid, idx) => [tid, scores[idx]])
+-			.sort(([, a], [, b]) => b - a)
++			.sort(([, a], [, b]) => (sort === 'least_replied' ? a - b : b - a))
+ 			.map(([tid]) => tid);
+ 
+ 		return sorted;
+diff --git a/src/controllers/activitypub/topics.js b/src/controllers/activitypub/topics.js
+index 3ca7c037f7..e02c936846 100644
+--- a/src/controllers/activitypub/topics.js
++++ b/src/controllers/activitypub/topics.js
+@@ -15,7 +15,7 @@ const helpers = require('../helpers');
+ const controller = module.exports;
+ 
+ const validSorts = [
+-	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views',
++	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views', 'least_replied',
+ ];
+ 
+ controller.list = async function (req, res) {
+diff --git a/src/controllers/category.js b/src/controllers/category.js
+index dd6caeea3b..e5a3500e1f 100644
+--- a/src/controllers/category.js
++++ b/src/controllers/category.js
+@@ -22,7 +22,7 @@ const categoryController = module.exports;
+ const url = nconf.get('url');
+ const relative_path = nconf.get('relative_path');
+ const validSorts = [
+-	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views',
++	'recently_replied', 'recently_created', 'most_posts', 'most_votes', 'most_views', 'least_replied',
+ ];
+ 
+ categoryController.get = async function (req, res, next) {
+diff --git a/src/topics/sorted.js b/src/topics/sorted.js
+index 2112fe3ad1..8e00c589ca 100644
+--- a/src/topics/sorted.js
++++ b/src/topics/sorted.js
+@@ -33,6 +33,7 @@ module.exports = function (Topics) {
+ 		data.tids = await filterTids(data.tids.slice(0, meta.config.recentMaxTopics), params);
+ 		data.topicCount = data.tids.length;
+ 		data.topics = await getTopics(data.tids, params);
++		
+ 		data.nextStart = params.stop + 1;
+ 		return data;
+ 	};
+diff --git a/src/views/admin/settings/post.tpl b/src/views/admin/settings/post.tpl
+index d361597946..1adf4711ce 100644
+--- a/src/views/admin/settings/post.tpl
++++ b/src/views/admin/settings/post.tpl
+@@ -23,6 +23,7 @@
+ 						<option value="most_posts">[[admin/settings/post:sorting.most-posts]]</option>
+ 						<option value="most_votes">[[admin/settings/post:sorting.most-votes]]</option>
+ 						<option value="most_views">[[admin/settings/post:sorting.most-views]]</option>
++						<option value="least_replied">[[admin/settings/post:sorting.least-replied]]</option>
+ 					</select>
+ 				</div>
+ 
+diff --git a/src/views/partials/category/sort.tpl b/src/views/partials/category/sort.tpl
+index 77f9f5b354..a9c3523fbb 100644
+--- a/src/views/partials/category/sort.tpl
++++ b/src/views/partials/category/sort.tpl
+@@ -35,5 +35,11 @@
+ 				<i class="flex-shrink-0 fa fa-fw text-secondary"></i>
+ 			</a>
+ 		</li>
++		<li>
++			<a class="dropdown-item rounded-1 d-flex align-items-center gap-2" href="#" data-sort="least_replied" role="menuitem">
++				<span class="flex-grow-1">[[topic:least-replied]]</span>
++				<i class="flex-shrink-0 fa fa-fw text-secondary"></i>
++			</a>
++		</li>
+ 	</ul>
+ </div>
+\ No newline at end of file
