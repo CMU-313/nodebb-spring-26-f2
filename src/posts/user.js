@@ -61,10 +61,17 @@ module.exports = function (Posts) {
 				if (isAdmin) {
 					u.username = '🔴 [STAFF] ' + u.username;
 					u.displayname = '🔴 [STAFF] ' + (u.displayname || u.username);
+					
+					if (!Array.isArray(u.custom_profile_info)) {
+						u.custom_profile_info = [];
+					}
+					const badgeHtml = '<span style="background-color: #d32f2f; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; margin-top: 5px; border: 1px solid #b71c1c;">STAFF</span>';
+					u.custom_profile_info.push({
+						content: badgeHtml,
+					});
 				}
 			}
 		}));
-
 		return hookResult.users;
 	};
 
