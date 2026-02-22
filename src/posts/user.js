@@ -53,6 +53,18 @@ module.exports = function (Posts) {
 			return await plugins.hooks.fire('filter:posts.modifyUserInfo', userData);
 		}));
 		const hookResult = await plugins.hooks.fire('filter:posts.getUserInfoForPosts', { users: result });
+
+		// change admin to red dot emoji [Staff] prefix 
+		await Promise.all(hookResult.users.map(async (u) => {
+			if (u && u.uid) {
+				const isAdmin = await user.isAdministrator(u.uid);
+				if (isAdmin) {
+					u.username = '🔴 [STAFF] ' + u.username;
+					u.displayname = '🔴 [STAFF] ' + (u.displayname || u.username);
+				}
+			}
+		}));
+
 		return hookResult.users;
 	};
 
