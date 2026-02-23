@@ -53,6 +53,25 @@ module.exports = function (Posts) {
 			return await plugins.hooks.fire('filter:posts.modifyUserInfo', userData);
 		}));
 		const hookResult = await plugins.hooks.fire('filter:posts.getUserInfoForPosts', { users: result });
+
+		// change admin to red dot emoji [Staff] prefix 
+		await Promise.all(hookResult.users.map(async (u) => {
+			if (u && u.uid) {
+				const isAdmin = await user.isAdministrator(u.uid);
+				if (isAdmin) {
+					u.username = '🔴 [STAFF] ' + u.username;
+					u.displayname = '🔴 [STAFF] ' + (u.displayname || u.username);
+					
+					if (!Array.isArray(u.custom_profile_info)) {
+						u.custom_profile_info = [];
+					}
+					const badgeHtml = '<span style="background-color: #d32f2f; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; margin-top: 5px; border: 1px solid #b71c1c;">STAFF</span>';
+					u.custom_profile_info.push({
+						content: badgeHtml,
+					});
+				}
+			}
+		}));
 		return hookResult.users;
 	};
 
