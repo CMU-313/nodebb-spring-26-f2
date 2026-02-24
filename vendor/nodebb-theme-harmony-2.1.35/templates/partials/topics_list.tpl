@@ -48,6 +48,10 @@
 						<i class="fa fa-arrow-circle-right"></i>
 						<span>[[topic:moved]]</span>
 					</span>
+					<span component="topic/staff-answered" class="badge border {{{ if !./staffAnswered }}}hidden{{{ end }}}" style="background-color: #fd7e14; color: #fff; border-color: #e96b00;" title="[[topic:staff-answered-tooltip]]">
+						<i class="fa fa-id-badge"></i>
+						<span>[[topic:staff-answered]]</span>
+					</span>
 					{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
 
 					{{{ if (!template.category || (cid != ./cid)) }}}
