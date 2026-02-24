@@ -69,6 +69,12 @@ module.exports = function (Topics) {
 			tids = await db[method](sortToSet(params.sort), 0, meta.config.recentMaxTopics - 1);
 		}
 
+		if (params.filter === 'staff-answered' && tids.length) {
+			const staffAnsweredTids = await db.getSortedSetMembers('topics:staff_answered');
+			const staffSet = new Set(staffAnsweredTids.map(String));
+			tids = tids.filter(tid => staffSet.has(String(tid)));
+		}
+
 		return tids;
 	}
 
@@ -254,7 +260,7 @@ module.exports = function (Topics) {
 		}
 
 		tids = await privileges.topics.filterTids('topics:read', tids, uid);
-		let topicData = await Topics.getTopicsFields(tids, ['uid', 'tid', 'cid', 'tags']);
+		let topicData = await Topics.getTopicsFields(tids, ['uid', 'tid', 'cid', 'tags', 'staffAnswered']);
 		const topicCids = _.uniq(topicData.map(topic => topic.cid)).filter(Boolean);
 
 		async function getIgnoredCids() {
