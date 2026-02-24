@@ -150,6 +150,8 @@ categoryController.get = async function (req, res, next) {
 	categoryData.selectedTag = tagData.selectedTag;
 	categoryData.selectedTags = tagData.selectedTags;
 	categoryData.sortOptionLabel = `[[topic:${validator.escape(String(sort)).replace(/_/g, '-')}]]`;
+	categoryData.filters = helpers.buildCategoryFilters(categoryData.slug, req.query.filter || '', req.query);
+	categoryData.selectedFilter = categoryData.filters.find(f => f && f.selected);
 
 	if (utils.isNumber(categoryData.cid) && !meta.config['feeds:disableRSS']) {
 		categoryData.rssFeedUrl = `${url}/category/${categoryData.cid}.rss`;
