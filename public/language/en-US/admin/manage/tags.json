@@ -9,10 +9,10 @@
 	"modify": "Modify Tags",
 	"rename": "Rename Tags",
 	"delete": "Delete Selected Tags",
+	"all-categories": "All Categories (Global)",
 	"search": "Search for tags...",
 	"settings": "Tags Settings",
 	"name": "Tag Name",
-
 	"alerts.editing": "Editing tag(s)",
 	"alerts.confirm-delete": "Do you want to delete the selected tags?",
 	"alerts.update-success": "Tag Updated!",
