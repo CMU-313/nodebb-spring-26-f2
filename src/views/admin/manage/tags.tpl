@@ -10,6 +10,13 @@
 				<span class="input-group-text"><i class="fa fa-search"></i></span>
 			</div>
 
+			<select id="scope-cid" class="form-select form-select-sm w-auto">
+				<option value="">[[admin/manage/tags:all-categories]]</option>
+				{{{ each categories }}}
+				<option value="{categories.cid}" {{{ if categories.selected }}}selected{{{ end }}}>{categories.name}</option>
+				{{{ end }}}
+			</select>
+
 
 			<button class="btn btn-light btn-sm text-nowrap" id="rename"><i class="fa fa-pencil text-primary"></i> [[admin/manage/tags:rename]]</button>
 			<button class="btn btn-light btn-sm text-nowrap" id="deleteSelected"><i class="fa fa-trash text-danger"></i> [[admin/manage/tags:delete]]</button>
