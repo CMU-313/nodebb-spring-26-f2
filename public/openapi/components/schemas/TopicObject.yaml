@@ -223,6 +223,9 @@ TopicObjectSlim:
           type: number
         viewcount:
           type: number
+        staffAnswered:
+          type: number
+          description: Whether a staff member created or replied in this topic (1) or not (0)
         postercount:
           type: number
         followercount:

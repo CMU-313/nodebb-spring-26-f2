@@ -119,6 +119,36 @@ get:
                       type: string
                   sortOptionLabel:
                     type: string
+                  filters:
+                    type: array
+                    description: Filter options for the category topic list (e.g. All Topics, Staff Answered)
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        url:
+                          type: string
+                        selected:
+                          type: boolean
+                        filter:
+                          type: string
+                        icon:
+                          type: string
+                  selectedFilter:
+                    type: object
+                    description: The currently selected filter
+                    properties:
+                      name:
+                        type: string
+                      url:
+                        type: string
+                      selected:
+                        type: boolean
+                      filter:
+                        type: string
+                      icon:
+                        type: string
                   handleFull:
                     type: string
                     description: |
