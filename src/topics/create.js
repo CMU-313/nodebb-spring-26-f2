@@ -82,8 +82,21 @@ module.exports = function (Topics) {
 			await Topics.scheduled.pin(tid, topicData);
 		}
 
+		const isStaff = await user.isAdministrator(data.uid);
+		if (isStaff && Topics.setStaffAnswered) {
+			await Topics.setStaffAnswered(topicData.tid, topicData.cid);
+		}
+
 		plugins.hooks.fire('action:topic.save', { topic: _.clone(topicData), data: data });
 		return topicData.tid;
+	};
+
+	Topics.setStaffAnswered = async function (tid, cid) {
+		await db.setObjectField(`topic:${tid}`, 'staffAnswered', 1);
+		await db.sortedSetAdd('topics:staff_answered', 1, tid);
+		if (cid != null && cid !== undefined && cid !== '') {
+			await db.sortedSetAdd(`cid:${cid}:tids:staff_answered`, 1, tid);
+		}
 	};
 
 	Topics.post = async function (data) {

@@ -39,6 +39,8 @@
     "deleted": "Deleted",
     "moved": "Moved",
     "moved-from": "Moved from %1",
+    "staff-answered": "Staff Answered",
+    "staff-answered-tooltip": "A staff member created or replied in this topic",
     "copy-code": "Copy Code",
     "copy-ip": "Copy IP",
     "ban-ip": "Ban IP",

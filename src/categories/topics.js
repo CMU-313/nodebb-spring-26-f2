@@ -122,6 +122,10 @@ module.exports = function (Categories) {
 			set.add(`cid:${cid}:uid:${data.targetUid}:tids`);
 		}
 
+		if (data.query && data.query.filter === 'staff-answered') {
+			set.add(`cid:${cid}:tids:staff_answered`);
+		}
+
 		if (parseInt(cid, 10) === -1 && uid > 0) {
 			set.delete(mainSet);
 			set.add(`uid:${uid}:inbox`);

@@ -6,6 +6,9 @@
 				<!-- IMPORT partials/category/watch.tpl -->
 				<!-- IMPORT partials/tags/filter-dropdown-left.tpl -->
 				<!-- IMPORT partials/category/sort.tpl -->
+				{{{ if (template.category && filters.length) }}}
+				<!-- IMPORT partials/topic-filters.tpl -->
+				{{{ end }}}
 				{{{ end }}}
 				{{{ if (template.popular || template.top)}}}
 				<!-- IMPORT partials/topic-terms.tpl -->

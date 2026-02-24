@@ -20,6 +20,14 @@ module.exports = function (Topics) {
 	Topics.onNewPostMade = async function (postData) {
 		await Topics.updateLastPostTime(postData.tid, postData.timestamp);
 		await Topics.addPostToTopic(postData.tid, postData);
+
+		const isStaff = await user.isAdministrator(postData.uid);
+		if (isStaff && Topics.setStaffAnswered) {
+			const topicData = await Topics.getTopicFields(postData.tid, ['staffAnswered', 'cid']);
+			if (!topicData || !topicData.staffAnswered) {
+				await Topics.setStaffAnswered(postData.tid, topicData && topicData.cid);
+			}
+		}
 	};
 
 	Topics.getTopicPosts = async function (topicData, set, start, stop, uid, reverse) {
