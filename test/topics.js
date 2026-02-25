@@ -1609,6 +1609,40 @@ describe('Topic\'s', () => {
 			assert(categoryTags.includes('notthis'));
 		});
 
+		it('should delete shared tag from topics in selected category only', async () => {
+			const categoryA = await categories.create({ name: 'scoped tag category a' });
+			const categoryB = await categories.create({ name: 'scoped tag category b' });
+
+			const postA = await topics.post({
+				uid: adminUid,
+				tags: ['sdf-scope'],
+				title: 'scope topic a',
+				content: 'topic in category a',
+				cid: categoryA.cid,
+			});
+
+			const postB = await topics.post({
+				uid: adminUid,
+				tags: ['sdf-scope'],
+				title: 'scope topic b',
+				content: 'topic in category b',
+				cid: categoryB.cid,
+			});
+
+			await socketAdmin.tags.deleteTags({ uid: adminUid }, {
+				tags: ['sdf-scope'],
+				cid: categoryA.cid,
+			});
+
+			const [tagsA, tagsB] = await Promise.all([
+				topics.getTopicTags(postA.topicData.tid),
+				topics.getTopicTags(postB.topicData.tid),
+			]);
+
+			assert(!tagsA.includes('sdf-scope'));
+			assert(tagsB.includes('sdf-scope'));
+		});
+
 		it('should add and remove tags from topics properly', async () => {
 			const category = await categories.create({ name: 'add/remove category' });
 			const { cid } = category;
