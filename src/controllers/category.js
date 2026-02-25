@@ -212,17 +212,16 @@ async function getTagTopicCountInCategory(tag, cid) {
 
 // Iterates through the category tags and triggers the counting logic 
 async function attachCountsToCategoryTags(categoryData) {
-   if (!Array.isArray(categoryData.tags) || !categoryData.tags.length) {
-       return;
-   }
-   const { cid } = categoryData;
-   const tagNames = categoryData.tags.map(t => t && (t.value || t.name)).filter(Boolean);
-   const counts = await Promise.all(tagNames.map(tag => getTagTopicCountInCategory(tag, cid)));
-
-
-   categoryData.tags.forEach((t, i) => {
-       t.countInCategory = counts[i] || 0;
-   });
+	if (!Array.isArray(categoryData.tags) || !categoryData.tags.length) {
+		return;
+	}
+	const { cid } = categoryData;
+	const tagNames = categoryData.tags.map(t => t && (t.value || t.name)).filter(Boolean);
+	const counts = await Promise.all(tagNames.map(tag => getTagTopicCountInCategory(tag, cid)));
+	
+	categoryData.tags.forEach((t, i) => {
+		t.countInCategory = counts[i] || 0;
+	});
 }
 
 
