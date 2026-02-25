@@ -95,6 +95,29 @@ helpers.buildFilters = function (url, filter, query) {
 		selected: filter === 'unreplied',
 		filter: 'unreplied',
 		icon: 'fa-reply',
+	}, {
+		name: '[[unread:staff-answered-topics]]',
+		url: url + helpers.buildQueryString(query, 'filter', 'staff-answered'),
+		selected: filter === 'staff-answered',
+		filter: 'staff-answered',
+		icon: 'fa-id-badge',
+	}];
+};
+
+helpers.buildCategoryFilters = function (slug, filter, query) {
+	const baseUrl = `category/${slug}`;
+	return [{
+		name: '[[unread:all-topics]]',
+		url: baseUrl + helpers.buildQueryString(query, 'filter', ''),
+		selected: filter !== 'staff-answered',
+		filter: '',
+		icon: 'fa-book',
+	}, {
+		name: '[[unread:staff-answered-topics]]',
+		url: baseUrl + helpers.buildQueryString(query, 'filter', 'staff-answered'),
+		selected: filter === 'staff-answered',
+		filter: 'staff-answered',
+		icon: 'fa-id-badge',
 	}];
 };
 

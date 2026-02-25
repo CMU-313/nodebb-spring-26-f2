@@ -59,13 +59,19 @@ module.exports = function (Posts) {
 			if (u && u.uid) {
 				const isAdmin = await user.isAdministrator(u.uid);
 				if (isAdmin) {
+
+					// prefix to name 
 					u.username = '🔴 [STAFF] ' + u.username;
 					u.displayname = '🔴 [STAFF] ' + (u.displayname || u.username);
-					
+
+					// if the pfp is default, the color gets changed to RED
+					u['icon:bgColor'] = '#d32f2f';
 					if (!Array.isArray(u.custom_profile_info)) {
 						u.custom_profile_info = [];
 					}
-					const badgeHtml = '<span style="background-color: #d32f2f; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; margin-top: 5px; border: 1px solid #b71c1c;">STAFF</span>';
+
+					// one red staff badge and one green verified badges
+					const badgeHtml = '<span style="background-color: #d32f2f; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; margin-top: 5px; border: 1px solid #b71c1c; box-shadow: 0 0 4px rgba(211, 47, 47, 0.8);">STAFF</span> <span style="background-color: #2e7d32; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; margin-top: 5px; border: 1px solid #1b5e20; box-shadow: 0 0 4px rgba(46, 125, 50, 0.8);">✓ VERIFIED</span>';
 					u.custom_profile_info.push({
 						content: badgeHtml,
 					});

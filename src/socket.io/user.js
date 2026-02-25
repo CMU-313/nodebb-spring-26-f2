@@ -114,6 +114,8 @@ SocketUser.getUnreadCounts = async function (socket) {
 		unreadChatCount: messaging.getUnreadCount(socket.uid),
 		unreadNotificationCount: user.notifications.getUnreadCount(socket.uid),
 	});
+	// Keep public API shape: only '', 'new', 'watched', 'unreplied' (exclude staff-answered)
+	delete results.unreadCounts['staff-answered'];
 	results.unreadTopicCount = results.unreadCounts[''];
 	results.unreadNewTopicCount = results.unreadCounts.new;
 	results.unreadWatchedTopicCount = results.unreadCounts.watched;
