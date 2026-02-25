@@ -93,10 +93,16 @@ module.exports = function (SocketTopics) {
 				cid: cids.length === 1 ? cids[0] : null,
 				cids: cids,
 			});
-			topics.getTagData(tags);
+			tags = topics.getTagData(tags);
 		} else {
 			tags = await topics.getCategoryTagsData(cids, 0, 39);
 		}
+		// Map score to countInCategory for template rendering
+		tags = tags.map(tag => ({
+			...tag,
+			countInCategory: tag.score || 0,
+		}));
+
 
 		return tags.filter(t => t.score > 0);
 	};
