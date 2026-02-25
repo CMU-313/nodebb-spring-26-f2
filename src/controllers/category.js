@@ -9,6 +9,7 @@ const db = require('../database');
 const privileges = require('../privileges');
 const user = require('../user');
 const categories = require('../categories');
+const topics = require('../topics'); // Add topics module for getTagTopicCountInCategory function
 const meta = require('../meta');
 const activitypub = require('../activitypub');
 const pagination = require('../pagination');
@@ -190,6 +191,23 @@ categoryController.get = async function (req, res, next) {
 
 	res.render('category', categoryData);
 };
+
+// Returns #topics in category "cid" that have the tag "tag"
+async function getTagTopicCountInCategory(tag, cid) { 
+	const key = `tag:${String(tag).toLowerCase()}:topics`;
+	const tids = await db.getSortedSetMembers(key); 
+	if (!tids || tids.length === 0) { 
+		return 0; 
+	} 
+	const topicData = await topics.getTopicsFields(tids, ['cid']); 
+	let count = 0; 
+	for (const t of topicData) { 
+		if (t && String(t.cid) === String(cid)) { 
+			count += 1; 
+		} 
+	} 
+	return count; 
+} 
 
 async function buildBreadcrumbs(req, categoryData) {
 	const breadcrumbs = [
