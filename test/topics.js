@@ -1643,6 +1643,40 @@ describe('Topic\'s', () => {
 			assert(tagsB.includes('sdf-scope'));
 		});
 
+		it('should update category tag lists when scoped tag is deleted', async () => {
+			const categoryA = await categories.create({ name: 'scoped tag category a' });
+			const categoryB = await categories.create({ name: 'scoped tag category b' });
+
+			await topics.post({
+				uid: adminUid,
+				tags: ['sdf-scope'],
+				title: 'scope topic a',
+				content: 'topic in category a',
+				cid: categoryA.cid,
+			});
+
+			await topics.post({
+				uid: adminUid,
+				tags: ['sdf-scope'],
+				title: 'scope topic b',
+				content: 'topic in category b',
+				cid: categoryB.cid,
+			});
+
+			await socketAdmin.tags.deleteTags({ uid: adminUid }, {
+				tags: ['sdf-scope'],
+				cid: categoryA.cid,
+			});
+
+			const [categoryATags, categoryBTags] = await Promise.all([
+				topics.getCategoryTags(categoryA.cid, 0, -1),
+				topics.getCategoryTags(categoryB.cid, 0, -1),
+			]);
+
+			assert(!categoryATags.includes('sdf-scope'));
+			assert(categoryBTags.includes('sdf-scope'));
+		});
+
 		it('should add and remove tags from topics properly', async () => {
 			const category = await categories.create({ name: 'add/remove category' });
 			const { cid } = category;
