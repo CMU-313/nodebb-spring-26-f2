@@ -118,6 +118,7 @@ categoryController.get = async function (req, res, next) {
 
 	categories.modifyTopicsByPrivilege(categoryData.topics, userPrivileges);
 	categoryData.tagWhitelist = categories.filterTagWhitelist(categoryData.tagWhitelist, userPrivileges.isAdminOrMod);
+	await attachCountsToCategoryTags(categoryData);
 
 	const allCategories = [];
 	categories.flattenCategories(allCategories, categoryData.children);
@@ -208,6 +209,22 @@ async function getTagTopicCountInCategory(tag, cid) {
 	} 
 	return count; 
 } 
+
+// Iterates through the category tags and triggers the counting logic 
+async function attachCountsToCategoryTags(categoryData) {
+   if (!Array.isArray(categoryData.tags) || !categoryData.tags.length) {
+       return;
+   }
+   const { cid } = categoryData;
+   const tagNames = categoryData.tags.map(t => t && (t.value || t.name)).filter(Boolean);
+   const counts = await Promise.all(tagNames.map(tag => getTagTopicCountInCategory(tag, cid)));
+
+
+   categoryData.tags.forEach((t, i) => {
+       t.countInCategory = counts[i] || 0;
+   });
+}
+
 
 async function buildBreadcrumbs(req, categoryData) {
 	const breadcrumbs = [
