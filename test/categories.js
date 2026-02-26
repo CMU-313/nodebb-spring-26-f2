@@ -11,6 +11,7 @@ const Topics = require('../src/topics');
 const User = require('../src/user');
 const groups = require('../src/groups');
 const privileges = require('../src/privileges');
+const categoryController = require('../src/controllers/category');
 
 describe('Categories', () => {
 	let categoryObj;
@@ -849,6 +850,62 @@ describe('Categories', () => {
 				plugins.hooks.unregister('my-test-plugin', 'filter:categories.getTopicIds', method);
 				done();
 			});
+		});
+	});
+
+		describe('getTagTopicCountInCategory - category-specific tag counting', () => {
+		let cat1;
+		let cat2;
+
+		before(async () => {
+			// Creating categories
+			cat1 = await Categories.create({ name: 'TagCount Cat 1', description: 'x' });
+			cat2 = await Categories.create({ name: 'TagCount Cat 2', description: 'x' });
+		});
+
+		it('should return 0 if tag has no topics', async () => {
+			const count = await categoryController._test.getTagTopicCountInCategory('no-such-tag', cat1.cid);
+			assert.strictEqual(count, 0);
+		});
+
+		it('should return 1 when exactly one topic in category has the tag', async () => {
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count One Topic',
+				content: 'Some content',
+				tags: ['one-tag'],
+			});
+
+			const count = await categoryController._test.getTagTopicCountInCategory('one-tag', cat1.cid);
+			assert.strictEqual(count, 1);
+		});
+
+		it('should count multiple topics with the same tag in the same category', async () => {
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 1',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 2',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 3',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+
+			const count = await categoryController._test.getTagTopicCountInCategory('many-tag', cat1.cid);
+			assert.strictEqual(count, 3);
 		});
 	});
 

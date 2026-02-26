@@ -304,3 +304,7 @@ function addTags(categoryData, res, currentPage) {
 		});
 	}
 }
+module.exports._test = {
+	getTagTopicCountInCategory,
+	attachCountsToCategoryTags,
+};
