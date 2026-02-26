@@ -399,6 +399,72 @@ describe('Topic\'s', () => {
 			assert.strictEqual(parseInt(staffAnswered, 10), 1);
 		});
 
+		it('should unset staffAnswered when admin deletes their reply (only staff post)', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply then delete',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to be deleted', tid: tid });
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+
+			await posts.delete(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should unset staffAnswered when admin purges their reply (only staff post)', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply then purge',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to be purged', tid: tid });
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+
+			await posts.purge(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should stay staff-answered when admin deletes their reply but topic was created by admin', async () => {
+			const created = await topics.post({
+				uid: adminUid,
+				title: 'Staff-created topic with staff reply',
+				content: 'Main post by admin',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Extra staff reply', tid: tid });
+			await posts.delete(reply.pid, adminUid);
+			const staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should set staffAnswered again when admin restores their deleted reply', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply restore',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to delete then restore', tid: tid });
+			await posts.delete(reply.pid, adminUid);
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+
+			await posts.restore(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
 		it('should include staffAnswered in topic data from getTopicsByTids', async () => {
 			const staffTopic = await topics.post({
 				uid: adminUid,
