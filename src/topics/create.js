@@ -99,6 +99,50 @@ module.exports = function (Topics) {
 		}
 	};
 
+	Topics.unsetStaffAnswered = async function (tid, cid) {
+		await db.setObjectField(`topic:${tid}`, 'staffAnswered', 0);
+		await db.sortedSetRemove('topics:staff_answered', tid);
+		if (cid != null && cid !== undefined && cid !== '') {
+			await db.sortedSetRemove(`cid:${cid}:tids:staff_answered`, tid);
+		}
+	};
+
+	Topics.recalculateStaffAnsweredForTopic = async function (tid) {
+		if (!tid || !Topics.setStaffAnswered || !Topics.unsetStaffAnswered) {
+			return;
+		}
+		try {
+			const topicData = await Topics.getTopicFields(tid, ['mainPid', 'uid', 'cid']);
+			if (!topicData || !topicData.cid) {
+				return;
+			}
+			// getPids includes main post (not in tid:${tid}:posts) plus all replies
+			const pids = await Topics.getPids(tid);
+			if (!pids.length) {
+				await Topics.unsetStaffAnswered(tid, topicData.cid);
+				return;
+			}
+			const postsData = await posts.getPostsFields(pids, ['uid', 'deleted']);
+			const authorUids = postsData
+				.filter(p => p && parseInt(p.deleted, 10) !== 1)
+				.map(p => String(p.uid));
+			const uniqueUids = _.uniq(authorUids);
+			if (!uniqueUids.length) {
+				await Topics.unsetStaffAnswered(tid, topicData.cid);
+				return;
+			}
+			const staffFlags = await Promise.all(uniqueUids.map(uid => user.isAdministrator(uid)));
+			const hasStaff = staffFlags.some(Boolean);
+			if (hasStaff) {
+				await Topics.setStaffAnswered(tid, topicData.cid);
+			} else {
+				await Topics.unsetStaffAnswered(tid, topicData.cid);
+			}
+		} catch (err) {
+			winston.error('[topics.recalculateStaffAnsweredForTopic] ' + err.message);
+		}
+	};
+
 	Topics.post = async function (data) {
 		data = await plugins.hooks.fire('filter:topic.post', data);
 		const { uid } = data;

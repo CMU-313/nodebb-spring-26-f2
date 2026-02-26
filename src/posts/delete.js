@@ -44,6 +44,9 @@ module.exports = function (Posts) {
 		if (type === 'delete') {
 			await flags.resolveFlag('post', pid, uid);
 		}
+		if (topics.recalculateStaffAnsweredForTopic) {
+			await topics.recalculateStaffAnsweredForTopic(postData.tid);
+		}
 		return postData;
 	}
 
@@ -88,6 +91,11 @@ module.exports = function (Posts) {
 		await resolveFlags(postData, uid);
 
 		plugins.hooks.fire('action:posts.purge', { posts: postData, uid: uid });
+
+		if (topics.recalculateStaffAnsweredForTopic) {
+			const tids = _.uniq(postData.map(p => p.tid));
+			await Promise.all(tids.map(tid => topics.recalculateStaffAnsweredForTopic(tid)));
+		}
 
 		await db.deleteAll(postData.map(p => `post:${p.pid}`));
 	};
