@@ -853,7 +853,7 @@ describe('Categories', () => {
 		});
 	});
 
-		describe('getTagTopicCountInCategory - category-specific tag counting', () => {
+	describe('getTagTopicCountInCategory - category-specific tag counting', () => {
 		let cat1;
 		let cat2;
 
