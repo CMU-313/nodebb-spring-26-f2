@@ -1259,7 +1259,65 @@ describe('Post\'s', () => {
 			});
 		});
 	});
+
+	// Testing added by Cindy Wang to test US 5: 
+	// As a staff member, I want to have a special flair on my responses, 
+	// so that students can easily identify authoritative answers from course staff.
+	// check more details about the acceptance criteria in UserGuide.md 
+	describe('staff flair', () => {
+		let adminUid;
+		let regularUid;
+		before(async () => {
+			adminUid = await user.create({ username: 'staffadmin' });
+			regularUid = await user.create({ username: 'regularuser' });
+			await groups.join('administrators', adminUid);
+		});
+
+		it('should add 🔴 [STAFF] prefix to admin username', async () => {
+			const result = await posts.getUserInfoForPosts([adminUid], adminUid);
+			assert(result[0].username.startsWith('🔴 [STAFF]'));
+		});
+
+		it('should add 🔴 [STAFF] prefix to admin displayname', async () => {
+			const result = await posts.getUserInfoForPosts([adminUid], adminUid);
+			assert(result[0].displayname.startsWith('🔴 [STAFF]'));
+		});
+
+		it('should set icon:bgColor to red for admin', async () => {
+			const result = await posts.getUserInfoForPosts([adminUid], adminUid);
+			assert.strictEqual(result[0]['icon:bgColor'], '#d32f2f');
+		});
+
+		it('should push STAFF badge into custom_profile_info for admin', async () => {
+			const result = await posts.getUserInfoForPosts([adminUid], adminUid);
+			const badges = result[0].custom_profile_info.map(b => b.content).join('');
+			assert(badges.includes('STAFF'));
+		});
+
+		it('should push VERIFIED badge into custom_profile_info for admin', async () => {
+			const result = await posts.getUserInfoForPosts([adminUid], adminUid);
+			const badges = result[0].custom_profile_info.map(b => b.content).join('');
+			assert(badges.includes('VERIFIED'));
+		});
+
+		it('should not add STAFF prefix to non-admin username', async () => {
+			const result = await posts.getUserInfoForPosts([regularUid], regularUid);
+			assert(!result[0].username.includes('[STAFF]'));
+		});
+
+		it('should not add badges to non-admin custom_profile_info', async () => {
+			const result = await posts.getUserInfoForPosts([regularUid], regularUid);
+			const badges = result[0].custom_profile_info.map(b => b.content).join('');
+			assert(!badges.includes('STAFF'));
+		});
+
+		it('should not add STAFF prefix to guest (uid 0)', async () => {
+			const result = await posts.getUserInfoForPosts([0], 0);
+			assert(!result[0].username.includes('[STAFF]'));
+		});
+	});
 });
+
 
 describe('Posts\'', async () => {
 	let files;
