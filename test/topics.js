@@ -331,6 +331,232 @@ describe('Topic\'s', () => {
 		});
 	});
 
+	// Testing staff-answered thread feature (US: staff-answered topics)
+	// A topic is staff-answered if a staff member (admin) created it or replied in it.
+	// Once marked, it remains staff-answered. Shown in listings with indicator; filter available.
+	describe('staff-answered thread', () => {
+		it('should set staffAnswered when topic is created by admin', async () => {
+			const result = await topics.post({
+				uid: adminUid,
+				title: 'Staff-created topic',
+				content: 'Content by admin',
+				cid: topic.categoryId,
+			});
+			const staffAnswered = await topics.getTopicField(result.topicData.tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should not set staffAnswered when topic is created by non-admin', async () => {
+			const result = await topics.post({
+				uid: fooUid,
+				title: 'User-created topic',
+				content: 'Content by regular user',
+				cid: topic.categoryId,
+			});
+			const staffAnswered = await topics.getTopicField(result.topicData.tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should set staffAnswered when admin replies in a topic', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+
+			await topics.reply({ uid: adminUid, content: 'Staff reply here', tid: tid });
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should not set staffAnswered when non-admin replies', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic with only user replies',
+				content: 'Initial post',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			await topics.reply({ uid: fooUid, content: 'Another user reply', tid: tid });
+			const staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should keep topic staff-answered once set (persistent)', async () => {
+			const created = await topics.post({
+				uid: adminUid,
+				title: 'Staff topic stays marked',
+				content: 'Content',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			await topics.reply({ uid: fooUid, content: 'User reply after staff topic', tid: tid });
+			const staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should unset staffAnswered when admin deletes their reply (only staff post)', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply then delete',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to be deleted', tid: tid });
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+
+			await posts.delete(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should unset staffAnswered when admin purges their reply (only staff post)', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply then purge',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to be purged', tid: tid });
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+
+			await posts.purge(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+		});
+
+		it('should stay staff-answered when admin deletes their reply but topic was created by admin', async () => {
+			const created = await topics.post({
+				uid: adminUid,
+				title: 'Staff-created topic with staff reply',
+				content: 'Main post by admin',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Extra staff reply', tid: tid });
+			await posts.delete(reply.pid, adminUid);
+			const staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should set staffAnswered again when admin restores their deleted reply', async () => {
+			const created = await topics.post({
+				uid: fooUid,
+				title: 'Topic for staff reply restore',
+				content: 'Initial post by user',
+				cid: topic.categoryId,
+			});
+			const tid = created.topicData.tid;
+			const reply = await topics.reply({ uid: adminUid, content: 'Staff reply to delete then restore', tid: tid });
+			await posts.delete(reply.pid, adminUid);
+			let staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered || 0, 10), 0);
+
+			await posts.restore(reply.pid, adminUid);
+			staffAnswered = await topics.getTopicField(tid, 'staffAnswered');
+			assert.strictEqual(parseInt(staffAnswered, 10), 1);
+		});
+
+		it('should include staffAnswered in topic data from getTopicsByTids', async () => {
+			const staffTopic = await topics.post({
+				uid: adminUid,
+				title: 'Topic for listing test',
+				content: 'Content',
+				cid: topic.categoryId,
+			});
+			const topicList = await topics.getTopicsByTids([staffTopic.topicData.tid], adminUid);
+			assert(topicList.length > 0);
+			assert(topicList[0].hasOwnProperty('staffAnswered'));
+			assert.strictEqual(parseInt(topicList[0].staffAnswered, 10), 1);
+		});
+
+		it('should filter to only staff-answered topics when filter=staff-answered', async () => {
+			const data = await topics.getSortedTopics({
+				uid: adminUid,
+				start: 0,
+				stop: 49,
+				filter: 'staff-answered',
+				term: 'alltime',
+				sort: 'recent',
+			});
+			// Every returned topic should have staffAnswered set
+			for (const t of data.topics) {
+				assert.strictEqual(parseInt(t.staffAnswered, 10), 1, `tid ${t.tid} should be staff-answered`);
+			}
+		});
+
+		it('should return only staff-answered topic ids for category with filter=staff-answered', async () => {
+			// One staff-answered and one non-staff-answered in same category
+			const staffTopic = await topics.post({
+				uid: adminUid,
+				title: 'Staff topic for category filter',
+				content: 'Content for staff topic here.',
+				cid: topic.categoryId,
+			});
+			const userTopic = await topics.post({
+				uid: fooUid,
+				title: 'User topic for category filter',
+				content: 'Content for user topic here.',
+				cid: topic.categoryId,
+			});
+			const tids = await categories.getTopicIds({
+				cid: topic.categoryId,
+				uid: adminUid,
+				start: 0,
+				stop: 49,
+				query: { filter: 'staff-answered' },
+			});
+			assert(Array.isArray(tids));
+			// Every returned tid should be staff-answered; userTopic must not appear
+			assert(!tids.includes(String(userTopic.topicData.tid)), 'non-staff-answered topic should not be in category staff-answered filter');
+			const topicData = await topics.getTopicsFields(tids, ['staffAnswered']);
+			for (const t of topicData) {
+				assert.strictEqual(parseInt(t.staffAnswered, 10), 1, `tid ${t.tid} should be staff-answered`);
+			}
+			assert(tids.includes(String(staffTopic.topicData.tid)), 'staff-answered topic should be in category staff-answered filter');
+		});
+
+		it('should return only staff-answered unread tids when filter=staff-answered', async () => {
+			// One staff-answered and one non-staff-answered; mark both unread for foo so both appear in unread list.
+			const staffTopic = await topics.post({
+				uid: adminUid,
+				title: 'Unread staff topic',
+				content: 'Content for unread staff topic.',
+				cid: topic.categoryId,
+			});
+			const userTopic = await topics.post({
+				uid: fooUid,
+				title: 'Unread user topic',
+				content: 'Content for unread user topic.',
+				cid: topic.categoryId,
+			});
+			await topics.markUnread(staffTopic.topicData.tid, fooUid);
+			await topics.markUnread(userTopic.topicData.tid, fooUid);
+
+			const unreadData = await topics.getUnreadData({ cid: 0, uid: fooUid });
+			const staffAnsweredTids = await topics.getUnreadTids({ cid: 0, uid: fooUid, filter: 'staff-answered' });
+			const staffAnsweredTidsStr = staffAnsweredTids.map(String);
+
+			assert.strictEqual(typeof unreadData.counts['staff-answered'], 'number');
+			assert(staffAnsweredTidsStr.includes(String(staffTopic.topicData.tid)), 'staff-answered unread topic should be in filter result');
+			assert(!staffAnsweredTidsStr.includes(String(userTopic.topicData.tid)), 'non-staff-answered unread topic should not be in filter result');
+			const fieldsList = await Promise.all(
+				staffAnsweredTids.map(tid => topics.getTopicFields(tid, ['staffAnswered']))
+			);
+			for (let i = 0; i < staffAnsweredTids.length; i++) {
+				assert.strictEqual(parseInt(fieldsList[i].staffAnswered, 10), 1, `tid ${staffAnsweredTids[i]} should be staff-answered`);
+			}
+		});
+	});
+
 	describe('Get methods', () => {
 		let newTopic;
 		let newPost;
@@ -1247,6 +1473,7 @@ describe('Topic\'s', () => {
 		});
 
 		it('should mark topic notifications read', async () => {
+			await User.notifications.deleteAll(adminUid);
 			await apiTopics.follow({ uid: adminUid }, { tid: tid });
 			const data = await topics.reply({ uid: uid, timestamp: Date.now(), content: 'some content', tid: tid });
 			await sleep(2500);

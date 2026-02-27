@@ -5,6 +5,7 @@ const _ = require('lodash');
 const validator = require('validator');
 const nconf = require('nconf');
 
+const winston = require('winston');
 const db = require('../database');
 const user = require('../user');
 const posts = require('../posts');
@@ -21,13 +22,21 @@ module.exports = function (Topics) {
 		await Topics.updateLastPostTime(postData.tid, postData.timestamp);
 		await Topics.addPostToTopic(postData.tid, postData);
 
-		const isStaff = await user.isAdministrator(postData.uid);
-		if (isStaff && Topics.setStaffAnswered) {
-			const topicData = await Topics.getTopicFields(postData.tid, ['staffAnswered', 'cid']);
-			if (!topicData || !topicData.staffAnswered) {
-				await Topics.setStaffAnswered(postData.tid, topicData && topicData.cid);
+		// Defer staff-answered update so we don't run extra topic reads in the reply notification path
+		const { tid, uid } = postData;
+		setImmediate(async () => {
+			try {
+				const isStaff = await user.isAdministrator(uid);
+				if (isStaff && Topics.setStaffAnswered) {
+					const topicData = await Topics.getTopicFields(tid, ['staffAnswered', 'cid']);
+					if (!topicData || !topicData.staffAnswered) {
+						await Topics.setStaffAnswered(tid, topicData && topicData.cid);
+					}
+				}
+			} catch (err) {
+				winston.error('[topics.onNewPostMade] staff-answered update failed: ' + err.message);
 			}
-		}
+		});
 	};
 
 	Topics.getTopicPosts = async function (topicData, set, start, stop, uid, reverse) {
