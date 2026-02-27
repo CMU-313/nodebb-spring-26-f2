@@ -11,6 +11,7 @@ const Topics = require('../src/topics');
 const User = require('../src/user');
 const groups = require('../src/groups');
 const privileges = require('../src/privileges');
+const categoryController = require('../src/controllers/category');
 
 describe('Categories', () => {
 	let categoryObj;
@@ -849,6 +850,118 @@ describe('Categories', () => {
 				plugins.hooks.unregister('my-test-plugin', 'filter:categories.getTopicIds', method);
 				done();
 			});
+		});
+	});
+
+	describe('getTagTopicCountInCategory - category-specific tag counting', () => {
+		let cat1;
+		let cat2;
+
+		before(async () => {
+			// Creating categories
+			cat1 = await Categories.create({ name: 'TagCount Cat 1', description: 'x' });
+			cat2 = await Categories.create({ name: 'TagCount Cat 2', description: 'x' });
+		});
+
+		it('should return 0 if tag has no topics', async () => {
+			const count = await categoryController._test.getTagTopicCountInCategory('no-such-tag', cat1.cid);
+			assert.strictEqual(count, 0);
+		});
+
+		it('should return 1 when exactly one topic in category has the tag', async () => {
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count One Topic',
+				content: 'Some content',
+				tags: ['one-tag'],
+			});
+
+			const count = await categoryController._test.getTagTopicCountInCategory('one-tag', cat1.cid);
+			assert.strictEqual(count, 1);
+		});
+
+		it('should count multiple topics with the same tag in the same category', async () => {
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 1',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 2',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Count Many Topic 3',
+				content: 'Some content',
+				tags: ['many-tag'],
+			});
+
+			const count = await categoryController._test.getTagTopicCountInCategory('many-tag', cat1.cid);
+			assert.strictEqual(count, 3);
+		});
+
+		it('should count only topics in the requested category (same tag across categories)', async () => {
+			// 2 in cat1
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Shared Tag Cat1 - 1',
+				content: 'Some content',
+				tags: ['shared-cross'],
+			});
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Shared Tag Cat1 - 2',
+				content: 'Some content',
+				tags: ['shared-cross'],
+			});
+
+			// 1 in cat2
+			await Topics.post({
+				uid: posterUid,
+				cid: cat2.cid,
+				title: 'Shared Tag Cat2 - 1',
+				content: 'Some content',
+				tags: ['shared-cross'],
+			});
+
+			const count1 = await categoryController._test.getTagTopicCountInCategory('shared-cross', cat1.cid);
+			const count2 = await categoryController._test.getTagTopicCountInCategory('shared-cross', cat2.cid);
+
+			assert.strictEqual(count1, 2);
+			assert.strictEqual(count2, 1);
+		});
+
+		it('should be case-insensitive on tag input', async () => {
+			await Topics.post({
+				uid: posterUid,
+				cid: cat1.cid,
+				title: 'Case Insensitive Tag',
+				content: 'Some content',
+				tags: ['MiXeDCaseTag'],
+			});
+
+			const countLower = await categoryController._test.getTagTopicCountInCategory('mixedcasetag', cat1.cid);
+			const countUpper = await categoryController._test.getTagTopicCountInCategory('MIXEDCASETAG', cat1.cid);
+
+			// Test case-insensitivity of tag counting, should both return 1
+			assert.strictEqual(countLower, 1);
+			assert.strictEqual(countUpper, 1);
+		});
+
+		it('should return 0 for a non-existent category id', async () => {
+			// Tag exists somewhere, but cid is bogus, so should count as 0
+			const count = await categoryController._test.getTagTopicCountInCategory('many-tag', 99999999);
+			assert.strictEqual(count, 0);
 		});
 	});
 
