@@ -132,6 +132,18 @@ module.exports = function (Topics) {
 		}
 	};
 
+	Topics.renameTagsInCategory = async function (data, cid) {
+		cid = parseInt(cid, 10);
+		if (!cid) {
+			throw new Error('[[error:invalid-cid]]');
+		}
+
+		for (const tagData of data) {
+			// eslint-disable-next-line no-await-in-loop
+			await renameTagInCategory(tagData.value, tagData.newName, cid);
+		}
+	};
+
 	async function renameTag(tag, newTagName) {
 		if (!newTagName || tag === newTagName) {
 			return;
@@ -185,6 +197,51 @@ module.exports = function (Topics) {
 		await Topics.updateCategoryTagsCount(Object.keys(allCids), [newTagName]);
 	}
 
+	async function renameTagInCategory(tag, newTagName, cid) {
+		if (!newTagName || tag === newTagName) {
+			return;
+		}
+		newTagName = utils.cleanUpTag(newTagName, meta.config.maximumTagLength);
+		if (!newTagName || tag === newTagName) {
+			return;
+		}
+
+		const oldTagSet = `cid:${cid}:tag:${tag}:topics`;
+		const tids = await db.getSortedSetRange(oldTagSet, 0, -1);
+		if (!tids.length) {
+			return;
+		}
+
+		await Topics.createEmptyTag(newTagName);
+
+		const [scores, topicData] = await Promise.all([
+			db.sortedSetScores(oldTagSet, tids),
+			Topics.getTopicsFields(tids, ['tid', 'tags']),
+		]);
+
+		topicData.forEach((topic) => {
+			topic.tags = _.uniq(topic.tags.map(tagItem => tagItem.value).map(tagItem => (
+				tagItem === tag ? newTagName : tagItem
+			)));
+		});
+
+		await Promise.all([
+			db.sortedSetAdd(`tag:${newTagName}:topics`, scores, tids),
+			db.sortedSetAdd(`cid:${cid}:tag:${newTagName}:topics`, scores, tids),
+			db.sortedSetRemove(`tag:${tag}:topics`, tids),
+			db.sortedSetRemove(oldTagSet, tids),
+			db.setObjectBulk(
+				topicData.map(t => [`topic:${t.tid}`, { tags: t.tags.join(',') }])
+			),
+		]);
+
+		await Promise.all([
+			updateTagCount(tag),
+			updateTagCount(newTagName),
+		]);
+		await Topics.updateCategoryTagsCount([cid], [tag, newTagName]);
+	}
+
 	async function updateTagCount(tag) {
 		const count = await Topics.getTagTopicCount(tag);
 		await db.sortedSetAdd('tags:topic:count', count || 0, tag);
@@ -197,7 +254,7 @@ module.exports = function (Topics) {
 		return payload.tids;
 	};
 
-	Topics.getTagTidsByCids = async function (tag, cids, {start, stop}) {
+	Topics.getTagTidsByCids = async function (tag, cids, { start, stop }) {
 		const keys = cids.map(cid => `cid:${cid}:tag:${tag}:topics`);
 		const tids = await db.getSortedSetRevRange(keys, start, stop);
 		const payload = await plugins.hooks.fire('filter:topics.getTagTidsByCids', { tag, cids, start, stop, tids });
@@ -244,6 +301,30 @@ module.exports = function (Topics) {
 		});
 		await db.deleteAll(deleteKeys);
 	};
+
+	Topics.deleteTagsFromCategory = async function (tags, cid) {
+		if (!Array.isArray(tags) || !tags.length) {
+			return;
+		}
+		cid = parseInt(cid, 10);
+		if (!cid) {
+			throw new Error('[[error:invalid-cid]]');
+		}
+
+		for (const tag of tags) {
+			// eslint-disable-next-line no-await-in-loop
+			await removeTagFromCategory(tag, cid);
+		}
+	};
+
+	async function removeTagFromCategory(tag, cid) {
+		const tids = await db.getSortedSetRange(`cid:${cid}:tag:${tag}:topics`, 0, -1);
+		if (!tids.length) {
+			await Topics.updateCategoryTagsCount([cid], [tag]);
+			return;
+		}
+		await Topics.removeTags([tag], tids);
+	}
 
 	async function removeTagsFromTopics(tags) {
 		await async.eachLimit(tags, 50, async (tag) => {

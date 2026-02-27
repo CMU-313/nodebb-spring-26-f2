@@ -11,11 +11,24 @@ define('admin/manage/tags', [
 	Tags.init = function () {
 		selectable.enable('.tag-management', '.tag-row');
 
+		handleScopeChange();
 		handleCreate();
 		handleSearch();
 		handleRename();
 		handleDeleteSelected();
 	};
+
+	function getSelectedCid() {
+		const cid = parseInt($('#scope-cid').val(), 10);
+		return Number.isInteger(cid) && cid > 0 ? cid : null;
+	}
+
+	function handleScopeChange() {
+		$('#scope-cid').on('change', function () {
+			const cid = getSelectedCid();
+			ajaxify.go(cid ? `admin/manage/tags?cid=${cid}` : 'admin/manage/tags');
+		});
+	}
 
 	function handleCreate() {
 		const createModal = $('#create-modal');
@@ -63,11 +76,13 @@ define('admin/manage/tags', [
 				});
 			}
 			const query = $('#tag-search').val();
+			const cid = getSelectedCid();
 			if (!query) {
 				return renderTags(ajaxify.data.tags);
 			}
 			socket.emit('topics.searchAndLoadTags', {
 				query: query,
+				cid: cid,
 			}, function (err, result) {
 				if (err) {
 					return alerts.error(err);
@@ -94,6 +109,7 @@ define('admin/manage/tags', [
 						className: 'btn-primary save',
 						callback: function () {
 							const data = [];
+							const cid = getSelectedCid();
 							tagsToModify.each(function (idx, tag) {
 								tag = $(tag);
 								data.push({
@@ -102,7 +118,10 @@ define('admin/manage/tags', [
 								});
 							});
 
-							socket.emit('admin.tags.rename', data, function (err) {
+							socket.emit('admin.tags.rename', cid ? {
+								cid: cid,
+								tags: data,
+							} : data, function (err) {
 								if (err) {
 									return alerts.error(err);
 								}
@@ -128,11 +147,13 @@ define('admin/manage/tags', [
 					return;
 				}
 				const tags = [];
+				const cid = getSelectedCid();
 				tagsToDelete.each(function (index, el) {
 					tags.push($(el).attr('data-tag'));
 				});
 				socket.emit('admin.tags.deleteTags', {
 					tags: tags,
+					cid: cid,
 				}, function (err) {
 					if (err) {
 						return alerts.error(err);
