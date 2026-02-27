@@ -27,7 +27,7 @@
             <a class="dropdown-item rounded-1 d-flex align-items-center gap-2" role="menuitem" href="#">
                 <span component="tag-markup" class="flex-grow-1">
                     <div class="d-inline-flex align-items-center gap-1">
-                        {./valueEscaped}
+                        {./valueEscaped} ({./countInCategory})
                     </div>
                 </span>
                 <i component="tag/select/icon" class="flex-shrink-0 fa fa-fw fa-check {{{ if !./selected }}}invisible{{{ end }}}"></i>

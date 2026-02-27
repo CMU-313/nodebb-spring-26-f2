@@ -51,3 +51,44 @@ Staff-answered threads are only visible at the topic-list level: category pages,
 
 # User Story 10:
 [justin, aishani, mridula explain here delete this comment when u done]
+# User Story 10: 
+# User Guide: Category-Specific Tag Counts
+
+## Feature Overview
+This feature enhances the Category page by providing context-aware tag statistics. Previously, tags displayed on a category page showed the "Global Count" (how many times that tag exists across the entire forum). 
+
+With this update, when a user visits a specific category (e.g., "General Discussion"), the tags associated with those topics will display a count representing only the number of times that tag appears within that specific category.
+
+## How to Test
+Ensure you have at least two categories available (e.g.,General Discussion and Announcements).
+Step A: Navigate to the Announcements category. Create 2 new topics and give them both the tag “important”.
+Step B: Navigate to the General Discussion category. Create 1 new topic and give it the same tag “important”.
+
+### 3. Verifying the Feature
+View Announcements: Navigate to the Announcements category page. Click on tags to see that the “important” tag displays a count of 2.
+View General Discussion: Navigate to the General Discussion category page. Click on tags to see that the “important” tag displays a count of 1.
+Verify Global Logic: Navigate to the global Tags page (/tags). The “important” tag should still show its global total (3), confirming the new logic is correctly localized to the Category controller.
+
+## Automated Test
+Tests are in `test/categories.js` and search `describe('getTagTopicCountInCategory` to find the specific tests that were addded 
+Tests cover: 
+Category Data Attachment
+Verifies that the categoryController correctly attaches countInCategory for each tag in a category. This ensures the API response includes per-category topic counts for tags.
+
+Tag Isolation Across Categories
+Creates topics with the same tag in two different categories and asserts that getTagTopicCountInCategory returns distinct counts for each category. 
+
+Case-Insensitivity Check
+Confirms that tag counting is case-insensitive, so counts are accurate regardless of input case.
+
+Empty State Handling
+Ensures that if a tag exists globally but has no topics in the current category, getTagTopicCountInCategory returns 0 instead of an error or the total global count.
+
+Single Topic Counting
+Validates that the function correctly returns 1 when exactly one topic in a category has the tag.
+
+Multiple Topic Counting
+Verifies that multiple topics in the same category sharing a tag are counted correctly. 
+
+### Why these tests are sufficient
+These tests cover the full request to response lifecycle of the feature. By mocking multiple categories and verifying that the tag counts do not leak from one category to another, we ensure the filtering logic is robust. 

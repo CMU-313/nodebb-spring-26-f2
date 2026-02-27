@@ -9,6 +9,7 @@ const db = require('../database');
 const privileges = require('../privileges');
 const user = require('../user');
 const categories = require('../categories');
+const topics = require('../topics'); // Add topics module for getTagTopicCountInCategory function
 const meta = require('../meta');
 const activitypub = require('../activitypub');
 const pagination = require('../pagination');
@@ -117,6 +118,7 @@ categoryController.get = async function (req, res, next) {
 
 	categories.modifyTopicsByPrivilege(categoryData.topics, userPrivileges);
 	categoryData.tagWhitelist = categories.filterTagWhitelist(categoryData.tagWhitelist, userPrivileges.isAdminOrMod);
+	await attachCountsToCategoryTags(categoryData);
 
 	const allCategories = [];
 	categories.flattenCategories(allCategories, categoryData.children);
@@ -190,6 +192,38 @@ categoryController.get = async function (req, res, next) {
 
 	res.render('category', categoryData);
 };
+
+// Returns #topics in category "cid" that have the tag "tag"
+async function getTagTopicCountInCategory(tag, cid) { 
+	const key = `tag:${String(tag).toLowerCase()}:topics`;
+	const tids = await db.getSortedSetMembers(key); 
+	if (!tids || tids.length === 0) { 
+		return 0; 
+	} 
+	const topicData = await topics.getTopicsFields(tids, ['cid']); 
+	let count = 0; 
+	for (const t of topicData) { 
+		if (t && String(t.cid) === String(cid)) { 
+			count += 1; 
+		} 
+	} 
+	return count; 
+} 
+
+// Iterates through the category tags and triggers the counting logic 
+async function attachCountsToCategoryTags(categoryData) {
+	if (!Array.isArray(categoryData.tags) || !categoryData.tags.length) {
+		return;
+	}
+	const { cid } = categoryData;
+	const tagNames = categoryData.tags.map(t => t && (t.value || t.name)).filter(Boolean);
+	const counts = await Promise.all(tagNames.map(tag => getTagTopicCountInCategory(tag, cid)));
+	
+	categoryData.tags.forEach((t, i) => {
+		t.countInCategory = counts[i] || 0;
+	});
+}
+
 
 async function buildBreadcrumbs(req, categoryData) {
 	const breadcrumbs = [
@@ -270,3 +304,7 @@ function addTags(categoryData, res, currentPage) {
 		});
 	}
 }
+module.exports._test = {
+	getTagTopicCountInCategory,
+	attachCountsToCategoryTags,
+};
