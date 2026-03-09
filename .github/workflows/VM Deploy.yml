@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.SERVER_ADMIN }}
           password: ${{ secrets.ADMIN_PASSWORD }}
           script: | 
-            cd https://github.com/CMU-313/nodebb-spring-26-f2
+            cd nodebb-spring-26-f2
             git pull origin main
             docker compose down
             docker compose -f docker-compose-redis.yml up --build -d
