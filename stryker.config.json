@@ -7,7 +7,12 @@
     "clear-text",
     "progress"
   ],
-  "testRunner": "mocha",
+  "mutate": [
+    "src/**/*.js",
+    "!src/cli/index.js"
+  ],
+  "ignorePatterns": ["build", "public/uploads", "coverage", "dist"],
+  "testRunner": "command",
   "testRunner_comment": "Take a look at https://stryker-mutator.io/docs/stryker-js/mocha-runner for information about the mocha plugin.",
   "coverageAnalysis": "perTest"
 }
