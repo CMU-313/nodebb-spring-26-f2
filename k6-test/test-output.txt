@@ -1,0 +1,49 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: k6-test/smoke-test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 1 iterations for each of 1 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+
+running (00m01.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 1 VUs  00m01.0s/10m0s  0/1 iters, 1 per VU
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 1       0.922357/s
+    checks_succeeded...: 100.00% 1 out of 1
+    checks_failed......: 0.00%   0 out of 1
+
+    ✓ status is 200
+
+    HTTP
+    http_req_duration..............: avg=77.28ms min=77.28ms med=77.28ms max=77.28ms p(90)=77.28ms p(95)=77.28ms
+      { expected_response:true }...: avg=77.28ms min=77.28ms med=77.28ms max=77.28ms p(90)=77.28ms p(95)=77.28ms
+    http_req_failed................: 0.00% 0 out of 1
+    http_reqs......................: 1     0.922357/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.08s   min=1.08s   med=1.08s   max=1.08s   p(90)=1.08s   p(95)=1.08s  
+    iterations.....................: 1     0.922357/s
+    vus............................: 1     min=1      max=1
+    vus_max........................: 1     min=1      max=1
+
+    NETWORK
+    data_received..................: 50 kB 46 kB/s
+    data_sent......................: 70 B  65 B/s
+
+
+
+
+running (00m01.1s), 0/1 VUs, 1 complete and 0 interrupted iterations
+default ✓ [ 100% ] 1 VUs  00m01.1s/10m0s  1/1 iters, 1 per VU
