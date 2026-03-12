@@ -1,0 +1,98 @@
+[32m22:49:56 (10452) INFO ProjectReader[39m Found 584 of 14447 file(s) to be mutated.
+[91m22:49:57 (10452) ERROR Stryker[39m Unexpected error occurred while running Stryker SyntaxError: /workspaces/nodebb-team/src/cli/index.js: 'return' outside of function. (113:1)
+
+  111 | if (!configExists && process.argv[2] !== 'setup') {
+  112 | 	require('./setup').webInstall();
+> 113 | 	return;
+      | 	^
+  114 | }
+  115 |
+  116 | if (configExists) {
+    at constructor (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:365:19)
+    at V8IntrinsicMixin.raise (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:6599:19)
+    at V8IntrinsicMixin.parseReturnStatement (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13136:12)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12798:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseStatementListItem (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12747:17)
+    at V8IntrinsicMixin.parseBlockOrModuleBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13316:61)
+    at V8IntrinsicMixin.parseBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13309:10)
+    at V8IntrinsicMixin.parseBlock (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13297:10)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12858:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseStatementOrSloppyAnnexBFunctionDeclaration (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12757:17)
+    at V8IntrinsicMixin.parseIfStatement (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13130:28)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12796:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseModuleItem (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12744:17)
+    at V8IntrinsicMixin.parseBlockOrModuleBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13316:36)
+    at V8IntrinsicMixin.parseBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13309:10)
+    at V8IntrinsicMixin.parseProgram (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12622:10)
+    at V8IntrinsicMixin.parseTopLevel (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12612:25)
+    at V8IntrinsicMixin.parse (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:14488:25)
+    at parse (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:14522:38)
+    at parser (/workspaces/nodebb-team/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at parse (/workspaces/nodebb-team/node_modules/@babel/core/lib/parse.js:25:37)
+    at parse.next (<anonymous>)
+    at step (/workspaces/nodebb-team/node_modules/gensync/index.js:261:32)
+    at /workspaces/nodebb-team/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/workspaces/nodebb-team/node_modules/gensync/index.js:223:11) {
+  code: 'BABEL_PARSE_ERROR',
+  reasonCode: 'IllegalReturn',
+  loc: Position { line: 113, column: 1, index: 3785 },
+  pos: 3785,
+  syntaxPlugin: undefined
+}
+[32m22:49:57 (10452) INFO Stryker[39m This might be a known problem with a solution documented in our troubleshooting guide.
+[32m22:49:57 (10452) INFO Stryker[39m You can find it at https://stryker-mutator.io/docs/stryker-js/troubleshooting/
+[32m22:49:57 (10452) INFO Stryker[39m Still having trouble figuring out what went wrong? Try `npx stryker run --fileLogLevel trace --logLevel debug` to get some more info.
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+SyntaxError: /workspaces/nodebb-team/src/cli/index.js: 'return' outside of function. (113:1)
+
+  111 | if (!configExists && process.argv[2] !== 'setup') {
+  112 | 	require('./setup').webInstall();
+> 113 | 	return;
+      | 	^
+  114 | }
+  115 |
+  116 | if (configExists) {
+    at constructor (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:365:19)
+    at V8IntrinsicMixin.raise (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:6599:19)
+    at V8IntrinsicMixin.parseReturnStatement (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13136:12)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12798:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseStatementListItem (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12747:17)
+    at V8IntrinsicMixin.parseBlockOrModuleBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13316:61)
+    at V8IntrinsicMixin.parseBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13309:10)
+    at V8IntrinsicMixin.parseBlock (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13297:10)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12858:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseStatementOrSloppyAnnexBFunctionDeclaration (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12757:17)
+    at V8IntrinsicMixin.parseIfStatement (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13130:28)
+    at V8IntrinsicMixin.parseStatementContent (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12796:21)
+    at V8IntrinsicMixin.parseStatementLike (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12767:17)
+    at V8IntrinsicMixin.parseModuleItem (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12744:17)
+    at V8IntrinsicMixin.parseBlockOrModuleBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13316:36)
+    at V8IntrinsicMixin.parseBlockBody (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:13309:10)
+    at V8IntrinsicMixin.parseProgram (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12622:10)
+    at V8IntrinsicMixin.parseTopLevel (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:12612:25)
+    at V8IntrinsicMixin.parse (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:14488:25)
+    at parse (/workspaces/nodebb-team/node_modules/@babel/parser/lib/index.js:14522:38)
+    at parser (/workspaces/nodebb-team/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at parse (/workspaces/nodebb-team/node_modules/@babel/core/lib/parse.js:25:37)
+    at parse.next (<anonymous>)
+    at step (/workspaces/nodebb-team/node_modules/gensync/index.js:261:32)
+    at /workspaces/nodebb-team/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/workspaces/nodebb-team/node_modules/gensync/index.js:223:11) {
+  code: 'BABEL_PARSE_ERROR',
+  reasonCode: 'IllegalReturn',
+  loc: Position { line: 113, column: 1, index: 3785 },
+  pos: 3785,
+  syntaxPlugin: undefined
+}
+
+Node.js v22.16.0
