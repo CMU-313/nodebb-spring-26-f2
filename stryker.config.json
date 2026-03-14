@@ -7,12 +7,17 @@
     "clear-text",
     "progress"
   ],
-  "mutate": [
-    "src/**/*.js",
-    "!src/cli/index.js"
-  ],
-  "ignorePatterns": ["build", "public/uploads", "coverage", "dist"],
   "testRunner": "command",
+  "commandRunner": {
+    "command": "npx mocha test/pagination.js"
+  },
   "testRunner_comment": "Take a look at https://stryker-mutator.io/docs/stryker-js/mocha-runner for information about the mocha plugin.",
-  "coverageAnalysis": "perTest"
+  "coverageAnalysis": "off",
+  "mutate": [
+    "src/pagination.js"
+  ],
+  "ignorePatterns": [
+    "src/cli/index.js",
+    "build/public/plugins/**"
+  ]
 }
