@@ -1,0 +1,25 @@
+k6 Load Test for NodeBB
+
+Tool: k6 (dynamic analysis/load testing tool)
+
+Installation:
+k6 was installed and verified using:
+k6 version
+Our version: k6 v1.6.1 (commit/devel, go1.26.0, linux/arm64)
+
+Execution:
+The NodeBB server was started locally on http://localhost:4567.
+
+The k6 test was executed using the command:
+k6 run k6-test/smoke-test.js
+
+Test Description:
+The script sends an HTTP GET request to the NodeBB homepage and checks that the
+response status is 200 (OK).
+
+Artifacts:
+- smoke-test.js : the k6 test script
+- k6-output.txt : terminal output from running the test
+
+Result:
+The test completed successfully and returned HTTP status 200 with no failed requests.
