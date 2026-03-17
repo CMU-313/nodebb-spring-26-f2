@@ -28,14 +28,12 @@ jobs:
     services:
       redis:
         image: 'redis:8.0.1'
-        # Set health checks to wait until redis has started
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps port 6379 on service container to the host
           - 6379:6379
 
     steps:
@@ -90,3 +88,77 @@ jobs:
 
       - name: Test coverage
         uses: coverallsapp/github-action@v2
+
+  k6-smoke:
+    runs-on: ubuntu-latest
+    env:
+      TEST_ENV: 'production'
+
+    services:
+      redis:
+        image: 'redis:8.0.1'
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: cp install/package.json package.json
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: NPM Install
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+
+      - name: Setup on Redis
+        env:
+          SETUP: >-
+            {
+              "url": "http://127.0.0.1:4567/forum",
+              "secret": "abcdef",
+              "admin:username": "admin",
+              "admin:email": "test@example.org",
+              "admin:password": "hAN3Eg8W",
+              "admin:password:confirm": "hAN3Eg8W",
+
+              "database": "redis",
+              "redis:host": "127.0.0.1",
+              "redis:port": 6379,
+              "redis:password": "",
+              "redis:database": 0
+            }
+          CI: >-
+            {
+              "host": "127.0.0.1",
+              "database": 1,
+              "port": 6379
+            }
+        run: |
+          node app --setup="${SETUP}" --ci="${CI}"
+
+      - name: Start NodeBB
+        run: |
+          nohup node app > nodebb.log 2>&1 &
+          sleep 30
+
+      - name: Install k6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates gnupg2 curl
+          curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run k6 smoke test
+        run: k6 run k6-test/smoke-test.js
