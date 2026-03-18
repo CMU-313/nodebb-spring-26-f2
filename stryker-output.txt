@@ -1,0 +1,213 @@
+[32m23:02:19 (13674) INFO ProjectReader[39m Found 583 of 8114 file(s) to be mutated.
+[32m23:02:25 (13674) INFO Instrumenter[39m Instrumented 583 source file(s) with 65077 mutant(s)
+[32m23:02:25 (13674) INFO ConcurrencyTokenProvider[39m Creating 13 test runner process(es).
+[32m23:02:27 (13674) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m23:02:27 (13674) INFO DryRunExecutor[39m Starting initial test run (command test runner with "perTest" coverage analysis). This may take a while.
+[91m23:03:38 (13674) ERROR DryRunExecutor[39m One or more tests failed in the initial test run:
+	All tests
+		
+> nodebb@4.8.0 test
+> nyc --reporter=html --reporter=text-summary mocha
+
+
+info: configJSON
+
+info: {
+    "url": "http://localhost:4567",
+    "secret": "be76aff9-420b-46d0-a3f4-8a2d4367efff",
+    "database": "redis",
+    "port": "4567",
+    "redis": {
+        "host": "127.0.0.1",
+        "port": "6379",
+        "password": "",
+        "database": "0"
+    },
+    "test_database": {
+        "host": "127.0.0.1",
+        "port": "6379",
+        "password": "",
+        "database": "1"
+    }
+    
+}
+
+info: database config redis {"database":"1","host":"127.0.0.1","password":"","port":"6379"}
+
+info: environment production
+
+
+
+info: test_database flushed
+
+info: Populating database with default configs, if not already set...
+
+
+warn: [cache-buster] could not read cache buster ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/cache-buster' {"code":"ENOENT","errno":-2,"path":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/cache-buster","stack":"Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/cache-buster'\n    at async open (node:internal/fs/promises:633:25)\n    at async Object.readFile (node:internal/fs/promises:1237:14)\n    at async read (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/meta/cacheBuster.js:4:2265)\n    at async Configs.init (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/meta/configs.js:5:8988)\n    at async setupMockDefaults (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/test/mocks/databasemock.js:192:2)\n    at async Context.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/test/mocks/databasemock.js:156:2)","syscall":"open"}
+
+info: Giving default global privileges...
+
+
+info: Enabling default plugins
+
+
+info: [install/enableDefaultPlugins] activating default plugins {"0":"nodebb-plugin-dbsearch","1":"nodebb-widget-essentials","2":"nodebb-plugin-composer-default"}
+
+info: [socket.io] Restricting access to origin: *:*
+
+info: [api] Adding 0 route(s) to `api/v3/plugins`
+
+info: [router] Routes added
+
+info: 🎉 NodeBB Ready
+
+info: 🤝 Setting 'trust proxy' to true
+
+info: 📡 NodeBB is now listening on: 0.0.0.0:4567
+
+info: 🔗 Canonical URL: http://localhost:4567
+
+
+  
+.
+.
+.
+.
+.
+.
+.
+.
+!
+
+
+
+
+error [user.create] Validation email failed to send
+[emailer.send] Error: Failed to lookup view "emails/welcome" in views directory "/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/public/templates"
+    at Function.render (/workspaces/nodebb-team/node_modules/express/lib/application.js:597:17)
+    at Function.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/webserver.js:3:3407)
+    at node:internal/util:470:21
+    at new Promise (<anonymous>)
+    at Function.renderAsync (node:internal/util:456:12)
+    at Emailer.renderAndTranslate (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/emailer.js:20:642)
+    at Object.wrapperCallback [as renderAndTranslate] (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/promisify.js:3:12729)
+    at Emailer.sendToEmail (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/emailer.js:18:4284)
+    at async Emailer.send (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/emailer.js:17:595)
+    at async UserEmail.sendValidationEmail (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/email.js:11:8703)
+    at async create (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/create.js:3:22645)
+    at async User.create (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/create.js:3:6535)
+    at async setupData (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/test/api.js:191:32)
+    at async Context.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/test/api.js:497:6)
+
+error [posts/uploads] Error while saving post upload sizes (files/test.png): Input file contains unsupported image format
+
+error Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/users.csv'
+    at async Object.open (node:internal/fs/promises:633:25)
+    at async User.exportUsersCSV (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/admin.js:3:13733)
+    at async Timeout._onTimeout (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/socket.io/admin/user.js:3:30738)
+
+
+
+
+  8 passing (10s)
+  1 failing
+
+
+
+  1) should not error out when called:
+     TypeError: fetch failed
+      at node:internal/deps/undici/undici:13510:13
+      at async fetchCookieWrapper (/workspaces/nodebb-team/node_modules/fetch-cookie/cjs/index.js:187:22)
+      at async call (src/request.js:16:1825)
+      at async helpers.getCsrfToken (test/helpers/index.js:14:19)
+      at async helpers.loginUser (test/helpers/index.js:39:21)
+      at async setupData (test/api.js:322:14)
+      at async Context.<anonymous> (test/api.js:497:6)
+     Caused by: TypeError: Cannot destructure property 'ok' of '((cov_15jn7etzvk(...).s[59]++) , checkCache.get(...))' as it is undefined.
+      at lookup (src/request.js:12:242)
+      at emitLookup (node:net:1445:5)
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+      at lookupAndConnectMultiple (node:net:1444:3)
+      at node:net:1390:7
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+      at lookupAndConnect (node:net:1389:5)
+      at Socket.connect (node:net:1284:5)
+      at Object.connect (node:net:250:17)
+      at Client.connect (/workspaces/nodebb-team/node_modules/undici/lib/core/connect.js:92:20)
+      at connect (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/client.js:452:21)
+      at _resume (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/client.js:627:7)
+      at resume (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/client.js:561:3)
+      at Client.<computed> (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/client.js:285:31)
+      at [dispatch] (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/client.js:342:20)
+      at Client.dispatch (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/dispatcher-base.js:152:29)
+      at [dispatch] (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/pool-base.js:163:28)
+      at Pool.dispatch (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/dispatcher-base.js:152:29)
+      at [dispatch] (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/agent.js:124:23)
+      at FetchAgent.dispatch (/workspaces/nodebb-team/node_modules/undici/lib/dispatcher/dispatcher-base.js:152:29)
+      at FetchAgent.dispatch (src/request.js:16:1415)
+      at node:internal/deps/undici/undici:11144:55
+      at new Promise (<anonymous>)
+      at dispatch (node:internal/deps/undici/undici:11144:16)
+      at httpNetworkFetch (node:internal/deps/undici/undici:11041:73)
+      at httpNetworkOrCacheFetch (node:internal/deps/undici/undici:10927:39)
+      at httpFetch (node:internal/deps/undici/undici:10760:43)
+      at schemeFetch (node:internal/deps/undici/undici:10677:18)
+      at node:internal/deps/undici/undici:10522:26
+      at mainFetch (node:internal/deps/undici/undici:10541:11)
+      at fetching (node:internal/deps/undici/undici:10489:7)
+      at fetch (node:internal/deps/undici/undici:10358:20)
+      at fetch (node:internal/deps/undici/undici:13508:10)
+      at fetch (node:internal/bootstrap/web/exposed-window-or-worker:75:12)
+      at fetchCookieWrapper (/workspaces/nodebb-team/node_modules/fetch-cookie/cjs/index.js:187:28)
+      at async call (src/request.js:16:1825)
+      at async helpers.getCsrfToken (test/helpers/index.js:14:19)
+      at async helpers.loginUser (test/helpers/index.js:39:21)
+      at async setupData (test/api.js:322:14)
+      at async Context.<anonymous> (test/api.js:497:6)
+
+
+
+
+
+2026-03-12T23:03:36.442Z [4567/14018] - [31merror[39m: uncaughtException: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_posts.csv'
+Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_posts.csv'
+    at async open (node:internal/fs/promises:633:25)
+    at async Object.writeFile (node:internal/fs/promises:1207:14)
+    at async process.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-posts.js:5:2369) {"date":"Thu Mar 12 2026 23:03:36 GMT+0000 (Coordinated Universal Time)","error":{"code":"ENOENT","errno":-2,"path":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_posts.csv","syscall":"open"},"exception":true,"os":{"loadavg":[0.95,0.39,0.21],"uptime":4377.07},"process":{"argv":["/usr/local/bin/node","/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-posts.js"],"cwd":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf","execPath":"/usr/local/bin/node","gid":1000,"memoryUsage":{"arrayBuffers":1004383,"external":22366603,"heapTotal":302149632,"heapUsed":269704784,"rss":406384640},"pid":14018,"uid":1000,"version":"v22.16.0"},"stack":"Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_posts.csv'\n    at async open (node:internal/fs/promises:633:25)\n    at async Object.writeFile (node:internal/fs/promises:1207:14)\n    at async process.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-posts.js:5:2369)","trace":[{"column":25,"file":"node:internal/fs/promises","function":"async open","line":633,"method":null,"native":false},{"column":14,"file":"node:internal/fs/promises","function":"async Object.writeFile","line":1207,"method":"writeFile","native":false},{"column":2369,"file":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-posts.js","function":null,"line":5,"method":null,"native":false}]}
+
+2026-03-12T23:03:36.543Z [4567/14024] - [31merror[39m: uncaughtException: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_uploads.zip'
+Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_uploads.zip' {"date":"Thu Mar 12 2026 23:03:36 GMT+0000 (Coordinated Universal Time)","error":{"code":"ENOENT","errno":-2,"path":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_uploads.zip","syscall":"open"},"exception":true,"os":{"loadavg":[0.95,0.39,0.21],"uptime":4377.17},"process":{"argv":["/usr/local/bin/node","/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-uploads.js"],"cwd":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf","execPath":"/usr/local/bin/node","gid":1000,"memoryUsage":{"arrayBuffers":1495496,"external":5949428,"heapTotal":318517248,"heapUsed":270065016,"rss":417046528},"pid":14024,"uid":1000,"version":"v22.16.0"},"stack":"Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_uploads.zip'","trace":[]}
+
+2026-03-12T23:03:36.985Z [4567/14017] - [31merror[39m: uncaughtException: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_profile.json'
+Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_profile.json'
+    at async open (node:internal/fs/promises:633:25)
+    at async Object.writeFile (node:internal/fs/promises:1207:14)
+    at async process.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-profile.js:4:6674) {"date":"Thu Mar 12 2026 23:03:36 GMT+0000 (Coordinated Universal Time)","error":{"code":"ENOENT","errno":-2,"path":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_profile.json","syscall":"open"},"exception":true,"os":{"loadavg":[0.95,0.39,0.21],"uptime":4377.61},"process":{"argv":["/usr/local/bin/node","/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-profile.js"],"cwd":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf","execPath":"/usr/local/bin/node","gid":1000,"memoryUsage":{"arrayBuffers":999117,"external":22361337,"heapTotal":310071296,"heapUsed":273494168,"rss":418500608},"pid":14017,"uid":1000,"version":"v22.16.0"},"stack":"Error: ENOENT: no such file or directory, open '/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/build/export/1_profile.json'\n    at async open (node:internal/fs/promises:633:25)\n    at async Object.writeFile (node:internal/fs/promises:1207:14)\n    at async process.<anonymous> (/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-profile.js:4:6674)","trace":[{"column":25,"file":"node:internal/fs/promises","function":"async open","line":633,"method":null,"native":false},{"column":14,"file":"node:internal/fs/promises","function":"async Object.writeFile","line":1207,"method":"writeFile","native":false},{"column":6674,"file":"/workspaces/nodebb-team/.stryker-tmp/sandbox-5aJZaf/src/user/jobs/export-profile.js","function":null,"line":4,"method":null,"native":false}]}
+
+
+
+=============================== Coverage summary ===============================
+
+Statements   : 30.88% ( 19100/61846 )
+
+Branches     : 12.14% ( 17719/145908 )
+Functions    : 30.05% ( 2906/9668 )
+
+Lines        : 31.96% ( 18617/58241 )
+================================================================================
+
+[91m23:03:38 (13674) ERROR Stryker[39m There were failed tests in the initial test run.
+file:///workspaces/nodebb-team/node_modules/@stryker-mutator/core/dist/src/process/3-dry-run-executor.js:65
+                    throw new ConfigError('There were failed tests in the initial test run.');
+                          ^
+
+ConfigError: There were failed tests in the initial test run.
+    at DryRunExecutor.validateResultCompleted (file:///workspaces/nodebb-team/node_modules/@stryker-mutator/core/dist/src/process/3-dry-run-executor.js:65:27)
+    at DryRunExecutor.executeDryRun (file:///workspaces/nodebb-team/node_modules/@stryker-mutator/core/dist/src/process/3-dry-run-executor.js:100:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async WorkItem.execute (file:///workspaces/nodebb-team/node_modules/@stryker-mutator/core/dist/src/concurrent/pool.js:32:28)
+    at async file:///workspaces/nodebb-team/node_modules/@stryker-mutator/core/dist/src/concurrent/pool.js:69:13 {
+  innerError: undefined
+}
+
+Node.js v22.16.0
