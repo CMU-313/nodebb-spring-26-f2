@@ -49,8 +49,6 @@ Staff-answered threads are only visible at the topic-list level: category pages,
 - Run the unread-counts test that includes staff-answered: `./node_modules/.bin/mocha test/user.js --grep "unread counts"`.
 - The 13 topic tests cover: admin-created topic marked staff-answered, non-admin created not marked, admin reply sets staff-answered, non-admin reply does not, persistence after non-admin reply, unset when admin deletes their reply (only staff post), unset when admin deletes their reply (only staff post), stay staff-answered when admin deletes only their reply but topic was created by admin, set again when admin restores their deleted reply, `staffAnswered` in topic data from `getTopicsByTids`, global filter returns only staff-answered topics, category filter returns only staff-answered topic ids, and unread filter returns only staff-answered unread tids with correct count. The user test asserts `unreadCounts['staff-answered']` and `unreadStaffAnsweredTopicCount`. Every acceptance criterion has at least one corresponding test, including negative cases, so testing is complete.
 
-# User Story 10:
-[justin, aishani, mridula explain here delete this comment when u done]
 # User Story 10: 
 # User Guide: Category-Specific Tag Counts
 
