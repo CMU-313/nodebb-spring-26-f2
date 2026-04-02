@@ -1,0 +1,76 @@
+Unused dependencies
+* @adactive/bootstrap-tagsinput
+* @fontsource-utils/scss
+* @fontsource/inter
+* @fontsource/poppins
+* @fortawesome/fontawesome-free
+* @textcomplete/contenteditable
+* @textcomplete/core
+* @textcomplete/textarea
+* bootswatch
+* compare-versions
+* esbuild
+* imagesloaded
+* jquery-deserialize
+* jquery-serializeobject
+* mousetrap
+* nodebb-plugin-2factor
+* nodebb-plugin-composer-default
+* nodebb-plugin-dbsearch
+* nodebb-plugin-emoji
+* nodebb-plugin-emoji-android
+* nodebb-plugin-link-preview
+* nodebb-plugin-location-to-map
+* nodebb-plugin-markdown
+* nodebb-plugin-mentions
+* nodebb-plugin-spam-be-gone
+* nodebb-plugin-web-push
+* nodebb-rewards-essentials
+* nodebb-theme-harmony
+* nodebb-theme-lavender
+* nodebb-theme-peace
+* nodebb-theme-persona
+* nodebb-widget-essentials
+* nprogress
+* sortablejs
+* spdx-license-list
+* textcomplete
+* textcomplete.contenteditable
+* tinycon
+* yargs
+Unused devDependencies
+* @commitlint/cli
+* @commitlint/config-angular
+* coveralls
+* depcheck
+* grunt
+* husky
+* jscpd
+* lint-staged
+* madge
+* mocha
+* mocha-lcov-reporter
+* nyc
+* semgrep
+Missing dependencies
+* eslint: ./eslint.config.mjs
+* globals: ./eslint.config.mjs
+* winston-transport: ./test/defer-logger.js
+* alerts: ./public/src/sockets.js
+* hooks: ./public/src/modules/api.js
+* translator: ./public/src/admin/modules/relogin-timer.js
+* fontawesome: ./public/scss/fontawesome/loader.scss
+* v4-shims: ./public/scss/fontawesome/loader.scss
+* brands: ./public/scss/fontawesome/style-brands.scss
+* duotone: ./public/scss/fontawesome/style-duotone.scss
+* _duotone-icons: ./public/scss/fontawesome/style-duotone.scss
+* light: ./public/scss/fontawesome/style-light.scss
+* regular: ./public/scss/fontawesome/style-regular.scss
+* sharp-light: ./public/scss/fontawesome/style-sharp-light.scss
+* sharp-regular: ./public/scss/fontawesome/style-sharp-regular.scss
+* sharp-solid: ./public/scss/fontawesome/style-sharp-solid.scss
+* solid: ./public/scss/fontawesome/style-solid.scss
+* thin: ./public/scss/fontawesome/style-thin.scss
+* pkg:@fontsource-utils: ./public/scss/admin/fonts.scss
+* pkg:@fontsource: ./public/scss/admin/fonts.scss
+* highlight.js: ./build/public/scripts-client.js
