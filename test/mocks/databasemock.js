@@ -128,6 +128,12 @@ winston.info('database config %s', dbType, testDbConfig);
 winston.info(`environment ${global.env}`);
 
 const db = require('../../src/database');
+const translator = require('../../src/translate');
+
+translator.translate = async function (postData) {
+	const content = (postData && typeof postData.content === 'string') ? postData.content : '';
+	return [true, content];
+};
 
 module.exports = db;
 
