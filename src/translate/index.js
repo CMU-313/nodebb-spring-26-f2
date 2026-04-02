@@ -2,7 +2,7 @@
 //var request = require('request');
 
 const translatorApi = module.exports;
-const DEFAULT_TRANSLATOR_API = 'http://127.0.0.1:5000';
+const DEFAULT_TRANSLATOR_API = 'http://17313-team17.s3d.cmu.edu:500';
 
 translatorApi.translate = async function (postData) {
 	const content = (postData && typeof postData.content === 'string') ? postData.content : '';
